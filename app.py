@@ -3,13 +3,16 @@ import google.generativeai as genai
 from dotenv import load_dotenv
 import os
 
+# Load environment variables from .env
 load_dotenv()
 
 app = Flask(__name__)
 
-# Load API key from .env
+# ✅ Set up Gemini configuration (for v1)
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-model = genai.GenerativeModel("gemini-pro")
+
+# ✅ Explicitly create a Gemini model (v1)
+model = genai.GenerativeModel(model_name="models/gemini-pro")
 
 @app.route('/generate-content', methods=['POST'])
 def generate_content():
