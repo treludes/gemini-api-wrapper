@@ -15,6 +15,8 @@ genai.configure(
     client_options={"api_endpoint": "https://generativelanguage.googleapis.com"},
 )
 
+print("Gemini configured. Using endpoint: https://generativelanguage.googleapis.com")
+
 # ✅ Use full model name required for v1
 model = genai.GenerativeModel(model_name="models/gemini-pro")
 
