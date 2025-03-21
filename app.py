@@ -9,7 +9,12 @@ load_dotenv()
 app = Flask(__name__)
 
 # ✅ Set up Gemini configuration (for v1)
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+genai.configure(
+    api_key=os.getenv("GEMINI_API_KEY"),
+    transport="rest",  # <- Ensures it uses plain HTTPS (more reliable on Render)
+    client_options={"api_endpoint": "https://generativelanguage.googleapis.com"}
+)
+
 
 # ✅ Explicitly create a Gemini model (v1)
 model = genai.GenerativeModel(model_name="models/gemini-pro")
