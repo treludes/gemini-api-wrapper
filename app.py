@@ -23,21 +23,28 @@ model = genai.GenerativeModel(model_name="models/gemini-pro")
 
 @app.route('/generate-content', methods=['POST'])
 def generate_content():
+    print("🛬 /generate-content endpoint hit!")
+
     try:
-        data = request.get_json()
+        data = request.get_json(force=True)  # <- force JSON parsing
+        print("📥 Raw data:", data)
+
         prompt = data.get("prompt", "")
 
         if not prompt:
+            print("⚠️ No prompt provided!")
             return jsonify({"error": "No prompt provided"}), 400
 
         print("🚀 Prompt sent to Gemini:", prompt)
         response = model.generate_content(prompt)
         print("✅ Gemini response:", response.text)
+
         return jsonify({"response": response.text}), 200
 
     except Exception as e:
-        print("❌ Error:", e)
+        print("❌ Exception caught:", str(e))
         return jsonify({"error": str(e)}), 500
+
 
 @app.route('/')
 def home():
