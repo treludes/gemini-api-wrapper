@@ -1,58 +1,54 @@
 from flask import Flask, request, jsonify
-import google.generativeai as genai
-from dotenv import load_dotenv
 import os
-import pkg_resources
+import requests
+from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
 
-# ✅ Force the SDK to use v1 and REST
-genai.configure(
-    api_key=os.getenv("GEMINI_API_KEY"),
-    transport="rest",
-    client_options={"api_endpoint": "https://generativelanguage.googleapis.com"},
-)
-print("📦 google-generativeai version:", pkg_resources.get_distribution("google-generativeai").version)
-print("Gemini configured. Using endpoint: https://generativelanguage.googleapis.com")
+API_KEY = os.getenv("GEMINI_API_KEY")
+API_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent"
+HEADERS = {
+    "Content-Type": "application/json",
+    "Authorization": f"Bearer {API_KEY}"
+}
 
-# ✅ Use full model name required for v1
-model = genai.GenerativeModel(model_name="models/gemini-pro")
-print("🧠 Model config:", model._model_name)
-
-
-@app.route('/generate-content', methods=['POST'])
+@app.route("/generate-content", methods=["POST"])
 def generate_content():
-    print("🛬 /generate-content endpoint hit!")
-
     try:
-        data = request.get_json(force=True)  # <- force JSON parsing
-        print("📥 Raw data:", data)
-
+        data = request.get_json()
         prompt = data.get("prompt", "")
 
         if not prompt:
-            print("⚠️ No prompt provided!")
             return jsonify({"error": "No prompt provided"}), 400
 
-        print("🚀 Prompt sent to Gemini:", prompt)
-        response = model.generate_content(prompt)
-        print("✅ Gemini response:", response.text)
+        payload = {
+            "contents": [
+                {
+                    "parts": [{"text": prompt}],
+                    "role": "user"
+                }
+            ]
+        }
 
-        return jsonify({"response": response.text}), 200
+        response = requests.post(API_URL, headers=HEADERS, json=payload)
+        response.raise_for_status()
+
+        result = response.json()
+        print("✅ Gemini v1 response:", result)
+
+        content = result.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
+        return jsonify({"response": content})
 
     except Exception as e:
-        print("❌ Exception caught:", str(e))
+        print("❌ Error:", str(e))
         return jsonify({"error": str(e)}), 500
 
-
-@app.route('/')
+@app.route("/")
 def home():
-    return jsonify({"message": "Gemini API is live. Use POST /generate-content"})
+    return jsonify({"message": "Gemini API v1 (manual REST) is live!"})
 
-if __name__ == '__main__':
-    import os
+if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host="0.0.0.0", port=port)
