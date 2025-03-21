@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import google.generativeai as genai
 from dotenv import load_dotenv
 import os
+import pkg_resources
 
 # Load environment variables
 load_dotenv()
@@ -14,7 +15,7 @@ genai.configure(
     transport="rest",
     client_options={"api_endpoint": "https://generativelanguage.googleapis.com/v1"},
 )
-
+print("📦 google-generativeai version:", pkg_resources.get_distribution("google-generativeai").version)
 print("Gemini configured. Using endpoint: https://generativelanguage.googleapis.com")
 
 # ✅ Use full model name required for v1
