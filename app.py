@@ -30,7 +30,9 @@ def generate_content():
         if not prompt:
             return jsonify({"error": "No prompt provided"}), 400
 
+        print("🚀 Prompt sent to Gemini:", prompt)
         response = model.generate_content(prompt)
+        print("✅ Gemini response:", response.text)
         return jsonify({"response": response.text}), 200
 
     except Exception as e:
