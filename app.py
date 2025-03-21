@@ -3,20 +3,19 @@ import google.generativeai as genai
 from dotenv import load_dotenv
 import os
 
-# Load environment variables from .env
+# Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
 
-# ✅ Set up Gemini configuration (for v1)
+# ✅ Force the SDK to use v1 and REST
 genai.configure(
     api_key=os.getenv("GEMINI_API_KEY"),
-    transport="rest",  # <- Ensures it uses plain HTTPS (more reliable on Render)
+    transport="rest",
     client_options={"api_endpoint": "https://generativelanguage.googleapis.com"}
 )
 
-
-# ✅ Explicitly create a Gemini model (v1)
+# ✅ Use full model name required for v1
 model = genai.GenerativeModel(model_name="models/gemini-pro")
 
 @app.route('/generate-content', methods=['POST'])
@@ -29,13 +28,17 @@ def generate_content():
             return jsonify({"error": "No prompt provided"}), 400
 
         response = model.generate_content(prompt)
-
         return jsonify({"response": response.text}), 200
 
     except Exception as e:
+        print("❌ Error:", e)
         return jsonify({"error": str(e)}), 500
 
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))  # Render sets $PORT automatically
-    app.run(host='0.0.0.0', port=port)
+@app.route('/')
+def home():
+    return jsonify({"message": "Gemini API is live. Use POST /generate-content"})
 
+if __name__ == '__main__':
+    import os
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host='0.0.0.0', port=port)
