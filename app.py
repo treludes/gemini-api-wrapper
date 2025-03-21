@@ -13,9 +13,10 @@ app = Flask(__name__)
 genai.configure(
     api_key=os.getenv("GEMINI_API_KEY"),
     transport="rest",
-    client_options={"api_endpoint": "https://generativelanguage.googleapis.com/v1"},
+    client_options={"api_endpoint": "https://generativelanguage.googleapis.com"},
 )
 print("📦 google-generativeai version:", pkg_resources.get_distribution("google-generativeai").version)
+print("✅ Gemini SDK configured with endpoint:", genai._client._api_endpoint)
 print("Gemini configured. Using endpoint: https://generativelanguage.googleapis.com")
 
 # ✅ Use full model name required for v1
