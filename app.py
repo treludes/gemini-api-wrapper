@@ -9,11 +9,12 @@ app = Flask(__name__)
 
 # v1beta endpoint for text-bison-001
 API_KEY = os.getenv("GEMINI_API_KEY")
-API_URL = "https://generativelanguage.googleapis.com/v1beta/models/text-bison-001:generateContent"
+API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/text-bison-001:generateContent?key={API_KEY}"
+
 HEADERS = {
-    "Content-Type": "application/json",
-    "Authorization": f"Bearer {API_KEY}"
+    "Content-Type": "application/json"
 }
+
 
 @app.route("/generate-content", methods=["POST"])
 def generate_content():
