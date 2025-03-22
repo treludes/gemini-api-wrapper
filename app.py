@@ -7,8 +7,9 @@ load_dotenv()
 
 app = Flask(__name__)
 
+# v1beta endpoint for text-bison-001
 API_KEY = os.getenv("GEMINI_API_KEY")
-API_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent"
+API_URL = "https://generativelanguage.googleapis.com/v1beta/models/text-bison-001:generateContent"
 HEADERS = {
     "Content-Type": "application/json",
     "Authorization": f"Bearer {API_KEY}"
@@ -26,28 +27,30 @@ def generate_content():
         payload = {
             "contents": [
                 {
-                    "parts": [{"text": prompt}],
-                    "role": "user"
+                    "parts": [{"text": prompt}]
                 }
             ]
         }
+
+        print("🚀 Sending prompt:", prompt)
 
         response = requests.post(API_URL, headers=HEADERS, json=payload)
         response.raise_for_status()
 
         result = response.json()
-        print("✅ Gemini v1 response:", result)
+        print("✅ Gemini response:", result)
 
-        content = result.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
-        return jsonify({"response": content})
+        # Extract response text safely
+        text = result.get("candidates", [{}])[0].get("content", {}).get("parts", [{}])[0].get("text", "")
+        return jsonify({"response": text})
 
     except Exception as e:
-        print("❌ Error:", str(e))
+        print("❌ Error:", e)
         return jsonify({"error": str(e)}), 500
 
 @app.route("/")
 def home():
-    return jsonify({"message": "Gemini API v1 (manual REST) is live!"})
+    return jsonify({"message": "Gemini v1beta (text-bison-001) API is live!"})
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
